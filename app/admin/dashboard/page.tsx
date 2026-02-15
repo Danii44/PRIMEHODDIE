@@ -5,7 +5,7 @@ import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { LogOut, BarChart3, Package, ShoppingCart, Plus } from 'lucide-react';
+import { LogOut, BarChart3, Package, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { getAllProducts, getOrders } from '@/lib/firestore-service';
 import { Product, Order } from '@/lib/db-types';
