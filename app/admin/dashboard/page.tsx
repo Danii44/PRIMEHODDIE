@@ -180,7 +180,7 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                       <td className="py-3 text-[#A6ACB8] text-sm">
-                        {new Date(order.createdAt.toDate?.() || order.createdAt).toLocaleDateString()}
+                        {new Date(order.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
                   ))}

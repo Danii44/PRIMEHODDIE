@@ -89,7 +89,7 @@ export default function AdminOrdersPage() {
                       Order #{order.id.slice(0, 8)}
                     </h3>
                     <p className="text-sm text-[#A6ACB8]">
-                      {new Date(order.createdAt.toDate?.() || order.createdAt).toLocaleDateString()}
+                      {new Date(order.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="text-right">
