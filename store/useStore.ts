@@ -132,10 +132,12 @@ export const useStore = create<StoreState>()(
         const existingItemIndex = state.cart.findIndex(
           (item) => item.product.id === product.id && item.color === color && item.size === size
         );
+
+        // We only return the cart state, NOT the isCartOpen state
         if (existingItemIndex > -1) {
           const newCart = [...state.cart];
           newCart[existingItemIndex].quantity += 1;
-          return { cart: newCart };
+          return { cart: newCart }; 
         }
         return { cart: [...state.cart, { product, quantity: 1, color, size }] };
       }),

@@ -1,15 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
-import { ArrowUpRight, Loader2 } from 'lucide-react';
+import { ArrowUpRight, Loader2, Sparkles } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { useRouter } from 'next/navigation';
 
-interface CollectionGridProps {
-  onProductClick: (categoryName: string) => void;
-}
-
-export function CollectionGrid({ onProductClick }: CollectionGridProps) {
+export function CollectionGrid() {
   const { fetchProducts, getCategories, isLoading, products } = useStore();
+  const router = useRouter();
   
   // Fetch products on mount if not already loaded
   useEffect(() => {
@@ -17,6 +15,13 @@ export function CollectionGrid({ onProductClick }: CollectionGridProps) {
   }, [fetchProducts, products.length]);
 
   const categories = getCategories();
+
+  // Navigation logic to link to the shop with a category filter
+  const handleCategoryClick = (categoryName: string) => {
+    // Encodes the name (e.g., "Oversized Hoodies" -> "Oversized%20Hoodies")
+    const encodedCategory = encodeURIComponent(categoryName);
+    router.push(`/shop?category=${encodedCategory}`);
+  };
 
   if (isLoading) {
     return (
@@ -29,55 +34,68 @@ export function CollectionGrid({ onProductClick }: CollectionGridProps) {
   return (
     <section id="collection" className="relative py-24 lg:py-32 bg-[#0B0C0F]" style={{ zIndex: 40 }}>
       <div className="prime-container">
-        <div className="mb-12 lg:mb-16">
+        {/* Header with Brand Tagline */}
+        <div className="mb-12 lg:mb-16 relative">
+          <div className="flex items-center gap-2 mb-4 animate-fade-in">
+            <Sparkles className="w-4 h-4 text-[#7B2FF7]" />
+            <span className="text-[10px] font-bold tracking-[0.3em] text-[#7B2FF7] uppercase">
+              Curated Essentials
+            </span>
+          </div>
           <h2 className="prime-headline text-white mb-4 uppercase italic">COLLECTION</h2>
           <p className="prime-subheadline max-w-xl text-white/50">
             {categories.length > 0 
-              ? `Exploring ${products.length} designs across ${categories.length} style categories.`
-              : "No products found in the database."}
+              ? "Designed for those who demand more from their everyday rotation. Explore our latest silhouettes."
+              : "Our next drop is currently in production. Stay tuned."}
           </p>
         </div>
 
+        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {categories.map((category, index) => (
             <div
               key={category.id}
-              className={`category-card group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500 ${
+              className={`category-card group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-500 bg-[#16171D] ${
                 index === 0 ? 'sm:col-span-2 lg:col-span-2 lg:row-span-2' : ''
               }`}
-              onClick={() => onProductClick(category.name)}
+              onClick={() => handleCategoryClick(category.name)}
             >
               {/* Background Image */}
-              <div className="aspect-[4/3] lg:aspect-auto lg:h-full min-h-[300px]">
+              <div className="aspect-[4/3] lg:aspect-auto lg:h-full min-h-[350px]">
                 <img
                   src={category.image}
                   alt={category.name}
-                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 />
               </div>
 
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B0C0F] via-[#0B0C0F]/20 to-transparent opacity-90" />
+              {/* Advanced Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B0C0F] via-[#0B0C0F]/40 to-transparent opacity-90 transition-opacity group-hover:opacity-80" />
 
               {/* Content */}
               <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                <div className="flex items-end justify-between">
+                <div className="flex items-end justify-between translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
                   <div>
-                    <p className="text-xs font-bold tracking-widest text-[#7B2FF7] mb-2 uppercase">
-                      {category.count} {category.count === 1 ? 'Product' : 'Products'}
+                    {/* Category Specific Tagline Implementation */}
+                    <p className="text-[10px] font-bold tracking-widest text-[#7B2FF7] mb-2 uppercase">
+                      {index === 0 ? 'Premium Standard' : 'Latest Drop'} • {category.count} Designs
                     </p>
                     <h3 className="text-2xl lg:text-4xl font-black text-white group-hover:text-[#7B2FF7] transition-colors uppercase italic tracking-tighter">
                       {category.name}
                     </h3>
+                    <p className="text-[11px] text-white/40 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 uppercase tracking-widest">
+                      View All Products — Explore Fit
+                    </p>
                   </div>
-                  <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
+                  
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-500">
                     <ArrowUpRight className="w-6 h-6 text-white" />
                   </div>
                 </div>
               </div>
 
-              {/* Subtle Border */}
-              <div className="absolute inset-0 rounded-3xl border border-white/5 group-hover:border-[#7B2FF7]/30 transition-colors" />
+              {/* Glass Inner Border */}
+              <div className="absolute inset-4 rounded-[2rem] border border-white/0 group-hover:border-white/5 transition-all duration-700 pointer-events-none" />
             </div>
           ))}
         </div>

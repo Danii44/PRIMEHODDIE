@@ -3,16 +3,17 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/components/auth/AuthProvider';
-import { ConditionalNavigation } from '@/components/ConditionalNavigation'; // Use the conditional version
+import { CartDrawer } from "@/components/CartDrawer"; // Global Cart UI
+import { ConditionalNavigation } from '@/components/ConditionalNavigation';
 
 // Define fonts
 const geist = Geist({ 
   subsets: ['latin'],
-  variable: '--font-geist-sans', // Add CSS variable for use
+  variable: '--font-geist-sans',
 });
 const geistMono = Geist_Mono({ 
   subsets: ['latin'],
-  variable: '--font-geist-mono', // Add CSS variable for use
+  variable: '--font-geist-mono',
 });
 
 export const metadata: Metadata = {
@@ -51,17 +52,27 @@ export default function RootLayout({
           `}
         </style>
       </head>
-      {/* Fixed: Both font variables applied to body to clear the 'unused' warning */}
-      <body className={`${geist.variable} ${geistMono.variable} ${geist.className} bg-[#0B0C0F] text-white antialiased`} suppressHydrationWarning>
+      <body 
+        className={`${geist.variable} ${geistMono.variable} ${geist.className} bg-[#0B0C0F] text-white antialiased`} 
+        suppressHydrationWarning
+      >
+        {/* Grainy texture background overlay */}
         <div className="noise-overlay" />
+        
         <AuthProvider>
-          {/* Handles hiding the bar for /admin routes */}
+          {/* Global Navigation - communicates with Zustand Store */}
           <ConditionalNavigation /> 
+          
+          {/* FIX: Adding CartDrawer here makes it listen to the store 
+              on every single page route (/shop, /product/id, etc.)
+          */}
+          <CartDrawer /> 
           
           <main className="relative z-10">
             {children}
           </main>
 
+          {/* Toast notifications for "Added to Bag" feedback */}
           <Toaster 
             position="bottom-right" 
             toastOptions={{
@@ -69,6 +80,7 @@ export default function RootLayout({
                 background: '#12131A',
                 color: '#F2F4F8',
                 border: '1px solid rgba(255,255,255,0.1)',
+                fontFamily: 'var(--font-geist-sans)',
               },
             }}
           />

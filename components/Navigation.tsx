@@ -17,7 +17,7 @@ export function Navigation() {
   const router = useRouter();
   const isAdminPath = pathname.startsWith('/admin');
 
-  // Get store state
+  // We bring in setIsCartOpen to trigger the global drawer
   const { setIsCartOpen, getCartCount, user, isAuthenticated } = useStore();
   
   const isAdmin = user?.role === 'admin';
@@ -34,7 +34,7 @@ export function Navigation() {
   const handleLogout = async () => {
     try {
       await auth.signOut();
-      toast.success('Logged out');
+      toast.success('Logged out successfully');
       setIsMobileMenuOpen(false);
       router.push('/');
     } catch (error) {
@@ -60,7 +60,7 @@ export function Navigation() {
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* LOGO SECTION */}
+          
           <Link href="/" className="text-xl lg:text-3xl font-black tracking-tighter text-white italic uppercase flex items-center gap-2">
             PRIME<span className="text-[#7B2FF7]">HOODIE</span>
             {isAdminPath && (
@@ -70,7 +70,6 @@ export function Navigation() {
             )}
           </Link>
 
-          {/* DESKTOP NAV LINKS */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
@@ -85,19 +84,19 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* RIGHT SIDE ICONS */}
           <div className="flex items-center gap-2 lg:gap-4">
             <button className="p-2 text-[#A6ACB8] hover:text-white transition-colors">
               <Search className="w-5 h-5" />
             </button>
             
+            {/* CART BUTTON - Triggers global isCartOpen state */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-[#A6ACB8] hover:text-white transition-all active:scale-95"
+              className="relative p-2 text-[#A6ACB8] hover:text-white transition-all active:scale-90"
             >
               <ShoppingBag className="w-5 h-5 lg:w-6 lg:h-6" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#7B2FF7] text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-[#0B0C0F]">
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[#7B2FF7] text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-[#0B0C0F] animate-in zoom-in">
                   {cartCount}
                 </span>
               )}
@@ -110,7 +109,6 @@ export function Navigation() {
               {isAdmin ? <ShieldCheck className="w-5 h-5" /> : <User className="w-5 h-5" />}
             </Link>
 
-            {/* MOBILE MENU TRIGGER */}
             <div className="md:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
@@ -134,7 +132,6 @@ export function Navigation() {
                     ))}
                   </div>
 
-                  {/* LOGOUT BUTTON IN MOBILE MENU */}
                   {isAuthenticated && (
                     <button 
                       onClick={handleLogout}

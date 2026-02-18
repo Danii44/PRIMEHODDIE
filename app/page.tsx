@@ -16,14 +16,12 @@ import { FinalCTASection } from '@/sections/FinalCTASection';
 import { Footer } from '@/sections/Footer';
 import { Navigation } from '@/components/Navigation';
 import { CartDrawer } from '@/components/CartDrawer';
-
-
+import { ScrollReveal } from '@/components/ScrollReveal'; // Import the wrapper
+import { MarqueeBanner } from '@/components/MarqueeBanner'; // Import the wrapper
 
 export default function Home() {
-  // 1. Grab fetch logic and status from store
   const { fetchProducts, products, isLoading } = useStore();
 
-  // 2. Initial Global Fetch
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
@@ -32,8 +30,6 @@ export default function Home() {
     console.log("Selected product details:", product);
   };
 
-  // 3. Global Loading Guard 
-  // This prevents the page from crashing while 'products[0]' is being fetched
   if (isLoading && products.length === 0) {
     return (
       <div className="fixed inset-0 bg-[#0B0C0F] flex items-center justify-center z-[100]">
@@ -48,30 +44,63 @@ export default function Home() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#0B0C0F]">
-      <div className="noise-overlay" />
+    <div className="relative min-h-screen bg-[#0B0C0F] selection:bg-[#7B2FF7] selection:text-white">
+      {/* 1. Global Background Effects */}
+      <div className="noise-overlay fixed inset-0 z-0 opacity-20 pointer-events-none" />
       
+      {/* Subtle Glow following the scroll */}
+      <div className="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#7B2FF7]/10 blur-[150px] rounded-full pointer-events-none z-0" />
+
       <Navigation />
       
-      <main className="relative">
+      <main className="relative z-10">
+        {/* Hero doesn't need ScrollReveal because it's already visible on load */}
         <HeroSection />
         
-        {/* All sections now have guaranteed access to the 'products' array */}
-        <NewDropSection onProductClick={handleProductClick} />
+        {/* 2. Wrapped Sections for 'Reveal' Effect */}
+        <ScrollReveal>
+          <NewDropSection onProductClick={handleProductClick} />
+        </ScrollReveal>
         
-        <SignatureSection />
+        <ScrollReveal>
+          <SignatureSection />
+        </ScrollReveal>
         
-        <CollectionGrid onProductClick={handleProductClick} />
+        {/* EYE-CATCHING BREAK: Marquee */}
+        <MarqueeBanner />
+
+        <ScrollReveal>
+          <CollectionGrid />
+        </ScrollReveal>
         
-        <UrbanFitSection />
+        <ScrollReveal>
+          <UrbanFitSection />
+        </ScrollReveal>
         
-        <BestSellerSection onProductClick={handleProductClick} />
+        <ScrollReveal>
+          <BestSellerSection onProductClick={handleProductClick} />
+        </ScrollReveal>
         
-        <StudioDetailSection />
-        <ColorwaysSection />
-        <NightModeSection />
-        <EssentialsStackSection />
-        <FinalCTASection />
+        <ScrollReveal>
+          <StudioDetailSection />
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <ColorwaysSection />
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <NightModeSection />
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <EssentialsStackSection />
+        </ScrollReveal>
+
+        <ScrollReveal>
+          <FinalCTASection />
+        </ScrollReveal>
+
         <Footer />
       </main>
       
