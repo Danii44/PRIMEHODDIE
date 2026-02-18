@@ -13,7 +13,7 @@ export interface Product {
   originalPrice?: number;
   image: string;
   images?: string[];
-  category: string;
+  category: string; // This is the key field!
   colors: { name: string; value: string; image: string }[];
   sizes: string[];
   rating: number;
@@ -23,6 +23,13 @@ export interface Product {
   inStock: boolean;
   isNew?: boolean;
   isBestseller?: boolean;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  image: string;
+  count: number;
 }
 
 export interface CartItem {
@@ -36,22 +43,9 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'customer'; // Add this line
+  role: 'admin' | 'customer';
 }
 
-// --- CONSTANTS ---
-export const categories = [
-  { id: 'oversized', name: 'Oversized Hoodies', image: '/images/products/Hoddie-black.png', count: 12 },
-  { id: 'minimal', name: 'Minimal Hoodies', image: '/images/products/Hoddie-gray.png', count: 8 },
-  { id: 'graphic', name: 'Graphic Hoodies', image: '/images/products/Hoddie-navy.png', count: 6 },
-];
-
-export const testimonials = [
-  { id: '1', name: 'Marcus Chen', avatar: 'MC', rating: 5, text: "Quality is insane.", date: '2 weeks ago' },
-  { id: '2', name: 'Sarah Williams', avatar: 'SW', rating: 5, text: "Perfect fit.", date: '1 month ago' },
-];
-
-// --- STORE INTERFACE ---
 interface StoreState {
   products: Product[];
   isLoading: boolean;
@@ -60,8 +54,6 @@ interface StoreState {
   user: User | null;
   isAuthenticated: boolean;
   isCartOpen: boolean;
-  
-  // New UI State
   selectedSize: string;
   selectedColor: string;
 
@@ -69,8 +61,8 @@ interface StoreState {
   fetchProducts: () => Promise<void>;
   setUser: (user: User | null) => void;
   setIsCartOpen: (isOpen: boolean) => void;
-  setSelectedSize: (size: string) => void; // FIX: Added this
-  setSelectedColor: (color: string) => void; // FIX: Added this
+  setSelectedSize: (size: string) => void;
+  setSelectedColor: (color: string) => void;
   addToCart: (product: Product, color: string, size: string) => void;
   removeFromCart: (productId: string, color: string, size: string) => void;
   updateQuantity: (productId: string, color: string, size: string, quantity: number) => void;
@@ -81,9 +73,10 @@ interface StoreState {
   getCartTotal: () => number;
   getCartCount: () => number;
   isInWishlist: (productId: string) => boolean;
+  // NEW: Dynamic Category Getter
+  getCategories: () => Category[];
 }
 
-// --- ZUSTAND STORE IMPLEMENTATION ---
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
@@ -94,8 +87,6 @@ export const useStore = create<StoreState>()(
       user: null,
       isAuthenticated: false,
       isCartOpen: false,
-      
-      // Initialize UI State
       selectedSize: '',
       selectedColor: '',
 
@@ -112,21 +103,35 @@ export const useStore = create<StoreState>()(
         }
       },
 
+      // DYNAMIC CATEGORY LOGIC
+      getCategories: () => {
+        const products = get().products;
+        const categoryMap: Record<string, Category> = {};
+
+        products.forEach((product) => {
+          if (!categoryMap[product.category]) {
+            categoryMap[product.category] = {
+              id: product.category.toLowerCase().replace(/\s+/g, '-'),
+              name: product.category,
+              image: product.image, // Uses the first product image found as category cover
+              count: 0,
+            };
+          }
+          categoryMap[product.category].count += 1;
+        });
+
+        return Object.values(categoryMap);
+      },
+
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setIsCartOpen: (isOpen) => set({ isCartOpen: isOpen }),
-      
-      // FIX: Added action implementations
       setSelectedSize: (size) => set({ selectedSize: size }),
       setSelectedColor: (color) => set({ selectedColor: color }),
 
       addToCart: (product, color, size) => set((state) => {
         const existingItemIndex = state.cart.findIndex(
-          (item) => 
-            item.product.id === product.id && 
-            item.color === color && 
-            item.size === size
+          (item) => item.product.id === product.id && item.color === color && item.size === size
         );
-
         if (existingItemIndex > -1) {
           const newCart = [...state.cart];
           newCart[existingItemIndex].quantity += 1;
@@ -136,45 +141,29 @@ export const useStore = create<StoreState>()(
       }),
 
       removeFromCart: (productId, color, size) => set((state) => ({
-        cart: state.cart.filter(
-          (item) => !(item.product.id === productId && item.color === color && item.size === size)
-        ),
+        cart: state.cart.filter(item => !(item.product.id === productId && item.color === color && item.size === size)),
       })),
 
       updateQuantity: (productId, color, size, quantity) => set((state) => ({
         cart: state.cart.map((item) =>
           item.product.id === productId && item.color === color && item.size === size
-            ? { ...item, quantity: Math.max(1, quantity) }
-            : item
+            ? { ...item, quantity: Math.max(1, quantity) } : item
         ),
       })),
 
       clearCart: () => set({ cart: [] }),
-
       toggleWishlist: (productId) => set((state) => ({
         wishlist: state.wishlist.includes(productId)
-          ? state.wishlist.filter(id => id !== productId)
-          : [...state.wishlist, productId]
+          ? state.wishlist.filter(id => id !== productId) : [...state.wishlist, productId]
       })),
-
-      getCartTotal: () => {
-        return get().cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
-      },
-
-      getCartCount: () => {
-        return get().cart.reduce((sum, item) => sum + item.quantity, 0);
-      },
-
+      getCartTotal: () => get().cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0),
+      getCartCount: () => get().cart.reduce((sum, item) => sum + item.quantity, 0),
       isInWishlist: (productId) => get().wishlist.includes(productId),
     }),
     {
       name: 'prime-hoodie-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ 
-        cart: state.cart, 
-        wishlist: state.wishlist, 
-        user: state.user 
-      }),
+      partialize: (state) => ({ cart: state.cart, wishlist: state.wishlist, user: state.user }),
     }
   )
 );
